@@ -27,7 +27,6 @@ public class SplashActivity extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_splash);
 
         mContext = this;
-
         try {
             new Handler().postDelayed(new Runnable() {
                 @Override
