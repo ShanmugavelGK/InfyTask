@@ -12,7 +12,7 @@ import com.gkshanmugavel.newapp.databinding.RowItemListBinding;
 import com.gkshanmugavel.newapp.model.TitleModel;
 import com.gkshanmugavel.newapp.view_model.HomeViewModel;
 
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Adapter is use of binding the row item
@@ -21,11 +21,16 @@ public class RowAdapter
         extends RecyclerView.Adapter<RowAdapter.MyViewHolder> {
 
     Activity activity;
-    List<TitleModel> titleModels;
+    ArrayList<TitleModel> titleModels;
 
-    public RowAdapter(Activity activity, List<TitleModel> titleModels) {
+    public RowAdapter(Activity activity, ArrayList<TitleModel> titleModels) {
         this.activity = activity;
         this.titleModels = titleModels;
+    }
+
+    public void setDataSetChange(ArrayList<TitleModel> titleModels) {
+        this.titleModels = titleModels;
+        this.notifyDataSetChanged();
     }
 
     @NonNull

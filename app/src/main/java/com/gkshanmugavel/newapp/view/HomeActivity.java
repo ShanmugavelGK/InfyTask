@@ -17,7 +17,7 @@ import com.gkshanmugavel.newapp.network.RetrofitFactory;
 import com.gkshanmugavel.newapp.utils.MyProgressDialog;
 import com.gkshanmugavel.newapp.utils.Utility;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -30,36 +30,66 @@ public class HomeActivity extends AppCompatActivity {
     private MyProgressDialog progressDialog;
 
     private APIInterface mAPIInterface;
-    List<TitleModel> titleModels;
+    ArrayList<TitleModel> titleModels;
     RowAdapter adapter;
-
+    String title = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        activityHomeBinding = DataBindingUtil.setContentView(this, R.layout.activity_home);
-        mActivity = HomeActivity.this;
+        try {
 
-        activityHomeBinding.customToolBar.toolbarTitle.setText("Click List change title");
-        activityHomeBinding.sflRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                callAPI(false);
+            activityHomeBinding = DataBindingUtil.setContentView(this, R.layout.activity_home);
+            mActivity = HomeActivity.this;
+
+            title = getResources().getString(R.string.click_list);
+            activityHomeBinding.sflRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+                @Override
+                public void onRefresh() {
+                    callAPI(false);
+                }
+            });
+
+            // Scheme colors for animation
+            activityHomeBinding.sflRefresh.setColorSchemeColors(
+                    getResources().getColor(R.color.colorAccent),
+                    getResources().getColor(R.color.md_white_1000),
+                    getResources().getColor(R.color.colorPrimary),
+                    getResources().getColor(R.color.md_deep_purple_A200)
+            );
+
+            initView();
+            if (savedInstanceState != null) {
+                title = savedInstanceState.getString("title");
+                titleModels = (ArrayList<TitleModel>) savedInstanceState.getSerializable("items"); //Restoring fiveDefns
+                adapter.setDataSetChange(titleModels);
             }
-        });
 
-        // Scheme colors for animation
-        activityHomeBinding.sflRefresh.setColorSchemeColors(
-                getResources().getColor(R.color.colorAccent),
-                getResources().getColor(R.color.md_white_1000),
-                getResources().getColor(R.color.colorPrimary),
-                getResources().getColor(R.color.md_deep_purple_A200)
-        );
+            if (titleModels != null && titleModels.size() == 0)
+                callAPI(true);
 
-        activityHomeBinding.tvEmptyView.setText(R.string.data_loading);
-        activityHomeBinding.tvEmptyView.setVisibility(View.VISIBLE);
-        activityHomeBinding.rvItems.setVisibility(View.GONE);
-        callAPI(true);
+            if (titleModels.size() > 0) {
+                activityHomeBinding.tvEmptyView.setText(R.string.no_data);
+                activityHomeBinding.tvEmptyView.setVisibility(View.GONE);
+                activityHomeBinding.rvItems.setVisibility(View.VISIBLE);
+                activityHomeBinding.customToolBar.toolbarTitle.setText(title);
+            } else {
+                activityHomeBinding.tvEmptyView.setText(R.string.no_data);
+                activityHomeBinding.tvEmptyView.setVisibility(View.VISIBLE);
+                activityHomeBinding.rvItems.setVisibility(View.GONE);
+                activityHomeBinding.customToolBar.toolbarTitle.setText(title);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initView() {
+        titleModels = new ArrayList<>();
+        adapter = new RowAdapter(HomeActivity.this, titleModels);
+        activityHomeBinding.rvItems.setLayoutManager(new LinearLayoutManager(mActivity));
+        activityHomeBinding.rvItems.setAdapter(adapter);
     }
 
     /**
@@ -73,9 +103,15 @@ public class HomeActivity extends AppCompatActivity {
             Utility.showSnackBar(mActivity, mActivity.getString(R.string.no_internet_connection));
             if (activityHomeBinding.sflRefresh != null)
                 activityHomeBinding.sflRefresh.setRefreshing(false);
-            activityHomeBinding.tvEmptyView.setText(R.string.no_internet_connection);
-            activityHomeBinding.tvEmptyView.setVisibility(View.VISIBLE);
-            activityHomeBinding.rvItems.setVisibility(View.GONE);
+            if (titleModels.size() > 0) {
+                activityHomeBinding.tvEmptyView.setText(R.string.no_internet_connection);
+                activityHomeBinding.tvEmptyView.setVisibility(View.GONE);
+                activityHomeBinding.rvItems.setVisibility(View.VISIBLE);
+            } else {
+                activityHomeBinding.tvEmptyView.setText(R.string.no_internet_connection);
+                activityHomeBinding.tvEmptyView.setVisibility(View.VISIBLE);
+                activityHomeBinding.rvItems.setVisibility(View.GONE);
+            }
             return;
         }
 
@@ -97,9 +133,7 @@ public class HomeActivity extends AppCompatActivity {
                     if (response.code() == 200 && response.isSuccessful()) {
                         titleModels = response.body().rows;
                         if (titleModels.size() != 0) {
-                            adapter = new RowAdapter(HomeActivity.this, titleModels);
-                            activityHomeBinding.rvItems.setLayoutManager(new LinearLayoutManager(mActivity));
-                            activityHomeBinding.rvItems.setAdapter(adapter);
+                            adapter.setDataSetChange(titleModels);
                             activityHomeBinding.tvEmptyView.setVisibility(View.GONE);
                             activityHomeBinding.rvItems.setVisibility(View.VISIBLE);
                         } else {
@@ -110,15 +144,9 @@ public class HomeActivity extends AppCompatActivity {
                     } else {
                         Utility.showSnackBar(mActivity, response.message());
                     }
-                } catch (
-                        NullPointerException e)
-
-                {
+                } catch (NullPointerException e) {
                     e.printStackTrace();
-                } catch (
-                        Exception e)
-
-                {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -140,10 +168,26 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     /**
-     * @param title Tool bar Title
+     * @param mTitle Tool bar Title
      */
 
-    public void setChangeTitle(String title) {
+
+    public void setChangeTitle(String mTitle) {
+        title = mTitle;
         activityHomeBinding.customToolBar.toolbarTitle.setText(title);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("title", title);
+        outState.putSerializable("items", titleModels);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        title = savedInstanceState.getString("title");
+        titleModels = (ArrayList<TitleModel>) savedInstanceState.getSerializable("items"); //Restoring fiveDefns
     }
 }

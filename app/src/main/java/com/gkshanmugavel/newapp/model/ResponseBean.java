@@ -3,6 +3,7 @@ package com.gkshanmugavel.newapp.model;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,5 +16,5 @@ public class ResponseBean {
     public String title;
     @SerializedName("rows")
     @Expose
-    public List<TitleModel> rows = null;
+    public ArrayList<TitleModel> rows = null;
 }
