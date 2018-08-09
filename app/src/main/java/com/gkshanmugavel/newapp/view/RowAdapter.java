@@ -14,6 +14,9 @@ import com.gkshanmugavel.newapp.view_model.HomeViewModel;
 
 import java.util.List;
 
+/**
+ * Adapter is use of binding the row item
+ */
 public class RowAdapter
         extends RecyclerView.Adapter<RowAdapter.MyViewHolder> {
 
@@ -46,18 +49,20 @@ public class RowAdapter
         return titleModels.size();
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    /**
+     * View Holder is hold the UI
+     */
+    protected class MyViewHolder extends RecyclerView.ViewHolder {
         RowItemListBinding binding;
 
-        public MyViewHolder(RowItemListBinding binding) {
+        private MyViewHolder(RowItemListBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }
 
-        public void bindView(TitleModel bean) {
+        private void bindView(TitleModel bean) {
             binding.setModel(bean);
             binding.setViewModel(new HomeViewModel(activity));
         }
-
     }
 }

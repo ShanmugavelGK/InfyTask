@@ -11,6 +11,9 @@ import com.gkshanmugavel.newapp.R;
 import com.gkshanmugavel.newapp.model.TitleModel;
 import com.gkshanmugavel.newapp.view.HomeActivity;
 
+/**
+ * Home class view model
+ */
 public class HomeViewModel {
     Activity activity;
 
@@ -18,6 +21,10 @@ public class HomeViewModel {
         this.activity = activity;
     }
 
+    /**
+     * @param view     image view
+     * @param imageUrl image url
+     */
     @BindingAdapter({"bind:imageUrl"})
     public static void loadImage(ImageView view, String imageUrl) {
 
@@ -27,12 +34,13 @@ public class HomeViewModel {
 
         Glide.with(view.getContext())
                 .setDefaultRequestOptions(requestOptions)
-                .load(imageUrl).into(view);
+                .load(imageUrl)
+
+                .into(view);
     }
 
     /**
-     *
-     * @param v View
+     * @param v     View
      * @param model set the Model class
      */
     public void onClick(View v, TitleModel model) {
