@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
+import android.view.View;
 
 import com.gkshanmugavel.newapp.R;
 import com.gkshanmugavel.newapp.databinding.ActivityHomeBinding;
@@ -55,18 +56,26 @@ public class HomeActivity extends AppCompatActivity {
                 getResources().getColor(R.color.md_deep_purple_A200)
         );
 
+        activityHomeBinding.tvEmptyView.setText(R.string.data_loading);
+        activityHomeBinding.tvEmptyView.setVisibility(View.VISIBLE);
+        activityHomeBinding.rvItems.setVisibility(View.GONE);
         callAPI(true);
-
     }
 
     /**
      * API CAL
+     *
      * @param isProgressBar progress bar visibilty
      */
     private void callAPI(final boolean isProgressBar) {
 
         if (!Utility.isInternetConnected(mActivity)) {
             Utility.showSnackBar(mActivity, mActivity.getString(R.string.no_internet_connection));
+            if (activityHomeBinding.sflRefresh != null)
+                activityHomeBinding.sflRefresh.setRefreshing(false);
+            activityHomeBinding.tvEmptyView.setText(R.string.no_internet_connection);
+            activityHomeBinding.tvEmptyView.setVisibility(View.VISIBLE);
+            activityHomeBinding.rvItems.setVisibility(View.GONE);
             return;
         }
 
@@ -87,9 +96,17 @@ public class HomeActivity extends AppCompatActivity {
                         progressDialog.dismissDialog();
                     if (response.code() == 200 && response.isSuccessful()) {
                         titleModels = response.body().rows;
-                        adapter = new RowAdapter(HomeActivity.this, titleModels);
-                        activityHomeBinding.rvItems.setLayoutManager(new LinearLayoutManager(mActivity));
-                        activityHomeBinding.rvItems.setAdapter(adapter);
+                        if (titleModels.size() != 0) {
+                            adapter = new RowAdapter(HomeActivity.this, titleModels);
+                            activityHomeBinding.rvItems.setLayoutManager(new LinearLayoutManager(mActivity));
+                            activityHomeBinding.rvItems.setAdapter(adapter);
+                            activityHomeBinding.tvEmptyView.setVisibility(View.GONE);
+                            activityHomeBinding.rvItems.setVisibility(View.VISIBLE);
+                        } else {
+                            activityHomeBinding.tvEmptyView.setText(R.string.no_data);
+                            activityHomeBinding.tvEmptyView.setVisibility(View.VISIBLE);
+                            activityHomeBinding.rvItems.setVisibility(View.GONE);
+                        }
                     } else {
                         Utility.showSnackBar(mActivity, response.message());
                     }
