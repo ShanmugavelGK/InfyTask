@@ -53,7 +53,7 @@ public class HomeActivity extends AppCompatActivity {
             // Scheme colors for animation
             activityHomeBinding.sflRefresh.setColorSchemeColors(
                     getResources().getColor(R.color.colorAccent),
-                    getResources().getColor(R.color.md_white_1000),
+                    getResources().getColor(R.color.md_yellow_900),
                     getResources().getColor(R.color.colorPrimary),
                     getResources().getColor(R.color.md_deep_purple_A200)
             );
@@ -112,7 +112,6 @@ public class HomeActivity extends AppCompatActivity {
                 activityHomeBinding.tvEmptyView.setVisibility(View.VISIBLE);
                 activityHomeBinding.rvItems.setVisibility(View.GONE);
             }
-            return;
         }
 
         if (isProgressBar) {
@@ -126,11 +125,15 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<ResponseBean> call, Response<ResponseBean> response) {
                 try {
+
                     if (activityHomeBinding.sflRefresh != null)
                         activityHomeBinding.sflRefresh.setRefreshing(false);
                     if (isProgressBar)
                         progressDialog.dismissDialog();
-                    if (response.code() == 200 && response.isSuccessful()) {
+
+
+                    if (response.raw().cacheResponse() != null) {
+                        // true: response was served from cache
                         titleModels = response.body().rows;
                         if (titleModels.size() != 0) {
                             adapter.setDataSetChange(titleModels);
@@ -141,8 +144,27 @@ public class HomeActivity extends AppCompatActivity {
                             activityHomeBinding.tvEmptyView.setVisibility(View.VISIBLE);
                             activityHomeBinding.rvItems.setVisibility(View.GONE);
                         }
-                    } else {
-                        Utility.showSnackBar(mActivity, response.message());
+                    }
+
+                    if (response.raw().networkResponse() != null) {
+                        // true: response was served from network/server
+                        if (response.code() == 200 && response.isSuccessful()) {
+                            titleModels = response.body().rows;
+                            if (titleModels.size() != 0) {
+                                adapter.setDataSetChange(titleModels);
+                                activityHomeBinding.tvEmptyView.setVisibility(View.GONE);
+                                activityHomeBinding.rvItems.setVisibility(View.VISIBLE);
+                            } else {
+                                activityHomeBinding.tvEmptyView.setText(R.string.no_data);
+                                activityHomeBinding.tvEmptyView.setVisibility(View.VISIBLE);
+                                activityHomeBinding.rvItems.setVisibility(View.GONE);
+                            }
+                        } else {
+                            Utility.showSnackBar(mActivity, response.message());
+                            activityHomeBinding.tvEmptyView.setText(response.message());
+                            activityHomeBinding.tvEmptyView.setVisibility(View.VISIBLE);
+                            activityHomeBinding.rvItems.setVisibility(View.GONE);
+                        }
                     }
                 } catch (NullPointerException e) {
                     e.printStackTrace();
@@ -180,14 +202,22 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString("title", title);
-        outState.putSerializable("items", titleModels);
+        try {
+            outState.putString("title", title);
+            outState.putSerializable("items", titleModels);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        title = savedInstanceState.getString("title");
-        titleModels = (ArrayList<TitleModel>) savedInstanceState.getSerializable("items"); //Restoring fiveDefns
+        try {
+            title = savedInstanceState.getString("title");
+            titleModels = (ArrayList<TitleModel>) savedInstanceState.getSerializable("items"); //Restoring fiveDefns
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

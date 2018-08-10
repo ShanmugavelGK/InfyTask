@@ -4,10 +4,12 @@ package com.gkshanmugavel.newapp.model;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 /**
  * Elements of Row items
  */
-public class TitleModel {
+public class TitleModel implements Serializable {
     @SerializedName("title")
     @Expose
     private String title = null;

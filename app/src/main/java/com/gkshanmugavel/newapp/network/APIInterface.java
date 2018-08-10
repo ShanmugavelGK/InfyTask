@@ -9,6 +9,7 @@ import retrofit2.http.Headers;
 
 public interface APIInterface {
 
+
     @Headers({"Content-Type: application/json"})
     @GET("facts.json")
     Call<ResponseBean> getRowList();
