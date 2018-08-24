@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.databinding.BindingAdapter;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -45,5 +46,39 @@ public class HomeViewModel {
      */
     public void onClick(View v, TitleModel model) {
         ((HomeActivity) activity).setChangeTitle(model.getTitle());
+    }
+
+
+    /**
+     * @param v
+     * @param description description from API
+     */
+    @BindingAdapter({"bind:setDescription"})
+    public static void setDescription(TextView v, String description) {
+        if (description == null) {
+            v.setText(v.getContext().getString(R.string.no_description));
+        } else {
+            v.setText(description);
+        }
+    }
+
+
+    /**
+     * @param v
+     * @param title title from API
+     */
+    @BindingAdapter({"bind:setTitle"})
+    public static void setTitle(TextView v, String title) {
+        v.setText(title != null ? title : v.getContext().getString(R.string.no_title));
+    }
+
+
+    @BindingAdapter({"bind:visibility"})
+    public static void setVisibility(View v, TitleModel mTitle) {
+        if (mTitle.getTitle() == null && mTitle.getDescription() == null && mTitle.getImageHref() == null)
+            v.setVisibility(View.GONE);
+        else
+            v.setVisibility(View.VISIBLE);
+
     }
 }

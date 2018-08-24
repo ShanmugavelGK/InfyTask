@@ -20,16 +20,28 @@ import java.util.ArrayList;
 public class RowAdapter
         extends RecyclerView.Adapter<RowAdapter.MyViewHolder> {
 
-    Activity activity;
-    ArrayList<TitleModel> titleModels;
+    private Activity activity;
+    private ArrayList<TitleModel> titleModels;
 
     public RowAdapter(Activity activity, ArrayList<TitleModel> titleModels) {
         this.activity = activity;
         this.titleModels = titleModels;
     }
 
+
+    /**
+     *
+     * @param titleModels updated items
+     */
     public void setDataSetChange(ArrayList<TitleModel> titleModels) {
-        this.titleModels = titleModels;
+
+        ArrayList<TitleModel> temp = new ArrayList<>();
+        for (TitleModel mTitle : titleModels) {
+            if (!(mTitle.getTitle() == null && mTitle.getDescription() == null && mTitle.getImageHref() == null)) {
+                temp.add(mTitle);
+            }
+        }
+        this.titleModels = temp;
         this.notifyDataSetChanged();
     }
 

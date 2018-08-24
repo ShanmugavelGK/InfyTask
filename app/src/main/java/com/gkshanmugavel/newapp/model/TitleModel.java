@@ -21,7 +21,7 @@ public class TitleModel implements Serializable {
     private String imageHref = null;
 
     public String getTitle() {
-        return title == null ? "No Title" : title;
+        return title;
     }
 
     public void setTitle(String title) {
@@ -29,7 +29,7 @@ public class TitleModel implements Serializable {
     }
 
     public String getDescription() {
-        return description == null ? "No description" : description;
+        return description;
     }
 
     public void setDescription(String description) {

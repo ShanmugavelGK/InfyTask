@@ -3,6 +3,7 @@ package com.gkshanmugavel.newapp.view;
 import android.app.Activity;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,6 +15,7 @@ import com.gkshanmugavel.newapp.model.ResponseBean;
 import com.gkshanmugavel.newapp.model.TitleModel;
 import com.gkshanmugavel.newapp.network.APIInterface;
 import com.gkshanmugavel.newapp.network.RetrofitFactory;
+import com.gkshanmugavel.newapp.utils.DividerItemDecoration;
 import com.gkshanmugavel.newapp.utils.MyProgressDialog;
 import com.gkshanmugavel.newapp.utils.Utility;
 
@@ -89,6 +91,9 @@ public class HomeActivity extends AppCompatActivity {
         titleModels = new ArrayList<>();
         adapter = new RowAdapter(HomeActivity.this, titleModels);
         activityHomeBinding.rvItems.setLayoutManager(new LinearLayoutManager(mActivity));
+        activityHomeBinding.rvItems.addItemDecoration(
+                new DividerItemDecoration(ContextCompat.getDrawable(getApplicationContext(),
+                        R.drawable.divider)));
         activityHomeBinding.rvItems.setAdapter(adapter);
     }
 

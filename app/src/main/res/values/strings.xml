@@ -4,4 +4,7 @@
     <string name="data_loading">Loading...</string>
     <string name="no_data">List does not have data</string>
     <string name="click_list">Click List change title</string>
+
+    <string name="no_title">No Title</string>
+    <string name="no_description">No Description</string>
 </resources>
