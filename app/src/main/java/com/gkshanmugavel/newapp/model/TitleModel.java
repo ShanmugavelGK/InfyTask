@@ -10,6 +10,13 @@ import java.io.Serializable;
  * Elements of Row items
  */
 public class TitleModel implements Serializable {
+
+    public TitleModel(String title, String description, String imageHref) {
+        this.title = title;
+        this.description = description;
+        this.imageHref = imageHref;
+    }
+
     @SerializedName("title")
     @Expose
     private String title = null;

@@ -30,7 +30,6 @@ public class RowAdapter
 
 
     /**
-     *
      * @param titleModels updated items
      */
     public void setDataSetChange(ArrayList<TitleModel> titleModels) {
@@ -66,10 +65,18 @@ public class RowAdapter
         return titleModels.size();
     }
 
+    public ArrayList<TitleModel> getList() {
+        return titleModels;
+    }
+
+    public TitleModel getItemAt(int position) {
+        return titleModels.get(position);
+    }
+
     /**
      * View Holder is hold the UI
      */
-    protected class MyViewHolder extends RecyclerView.ViewHolder {
+    public class MyViewHolder extends RecyclerView.ViewHolder {
         RowItemListBinding binding;
 
         private MyViewHolder(RowItemListBinding binding) {

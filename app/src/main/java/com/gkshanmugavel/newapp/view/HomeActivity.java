@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.View;
 
+import com.gkshanmugavel.newapp.IdlingResource.CustomIdlingResource;
 import com.gkshanmugavel.newapp.R;
 import com.gkshanmugavel.newapp.databinding.ActivityHomeBinding;
 import com.gkshanmugavel.newapp.model.ResponseBean;
@@ -33,8 +34,9 @@ public class HomeActivity extends AppCompatActivity {
 
     private APIInterface mAPIInterface;
     ArrayList<TitleModel> titleModels;
-    RowAdapter adapter;
+    public RowAdapter adapter;
     String title = "";
+    private CustomIdlingResource mIdlingResource;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +56,6 @@ public class HomeActivity extends AppCompatActivity {
 
             // Scheme colors for animation
             activityHomeBinding.sflRefresh.setColorSchemeColors(
-                    getResources().getColor(R.color.colorAccent),
                     getResources().getColor(R.color.md_yellow_900),
                     getResources().getColor(R.color.colorPrimary),
                     getResources().getColor(R.color.md_deep_purple_A200)
@@ -67,8 +68,9 @@ public class HomeActivity extends AppCompatActivity {
                 adapter.setDataSetChange(titleModels);
             }
 
-            if (titleModels != null && titleModels.size() == 0)
+            if (titleModels != null && titleModels.size() == 0) {
                 callAPI(true);
+            }
 
             if (titleModels.size() > 0) {
                 activityHomeBinding.tvEmptyView.setText(R.string.no_data);
@@ -104,6 +106,8 @@ public class HomeActivity extends AppCompatActivity {
      */
     private void callAPI(final boolean isProgressBar) {
 
+        CustomIdlingResource.increment();
+
         if (!Utility.isInternetConnected(mActivity)) {
             Utility.showSnackBar(mActivity, mActivity.getString(R.string.no_internet_connection));
             if (activityHomeBinding.sflRefresh != null)
@@ -136,11 +140,13 @@ public class HomeActivity extends AppCompatActivity {
                     if (isProgressBar)
                         progressDialog.dismissDialog();
 
+                    CustomIdlingResource.decrement();
+
 
                     if (response.raw().cacheResponse() != null) {
                         // true: response was served from cache
-                        titleModels = response.body().rows;
-                        if (titleModels.size() != 0) {
+                        if (response.body().rows.size() != 0) {
+                            parer(response.body().rows);
                             adapter.setDataSetChange(titleModels);
                             activityHomeBinding.tvEmptyView.setVisibility(View.GONE);
                             activityHomeBinding.rvItems.setVisibility(View.VISIBLE);
@@ -154,8 +160,9 @@ public class HomeActivity extends AppCompatActivity {
                     if (response.raw().networkResponse() != null) {
                         // true: response was served from network/server
                         if (response.code() == 200 && response.isSuccessful()) {
-                            titleModels = response.body().rows;
-                            if (titleModels.size() != 0) {
+
+                            if (response.body().rows.size() != 0) {
+                                parer(response.body().rows);
                                 adapter.setDataSetChange(titleModels);
                                 activityHomeBinding.tvEmptyView.setVisibility(View.GONE);
                                 activityHomeBinding.rvItems.setVisibility(View.VISIBLE);
@@ -185,6 +192,9 @@ public class HomeActivity extends AppCompatActivity {
                         activityHomeBinding.sflRefresh.setRefreshing(false);
                     if (isProgressBar)
                         progressDialog.dismissDialog();
+
+                    CustomIdlingResource.decrement();
+
                     Utility.logError(t.getMessage());
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -192,6 +202,15 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void parer(ArrayList<TitleModel> original) {
+        ArrayList<TitleModel> temp = new ArrayList<>();
+        for (TitleModel mTitle : original) {
+            if (!(mTitle.getTitle() == null && mTitle.getDescription() == null && mTitle.getImageHref() == null)) {
+                titleModels.add(mTitle);
+            }
+        }
     }
 
     /**
@@ -225,4 +244,6 @@ public class HomeActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
+
 }
