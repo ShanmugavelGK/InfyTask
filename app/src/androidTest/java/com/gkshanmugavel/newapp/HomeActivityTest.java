@@ -7,15 +7,11 @@ import android.content.res.Configuration;
 import android.support.annotation.IdRes;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.IdlingRegistry;
-import android.support.test.espresso.contrib.RecyclerViewActions;
 import android.support.test.espresso.matcher.BoundedMatcher;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.TextView;
 
 import com.gkshanmugavel.newapp.IdlingResource.CustomIdlingResource;
@@ -41,8 +37,9 @@ import java.util.List;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition;
+import static android.support.test.espresso.contrib.RecyclerViewActions.scrollToPosition;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static android.support.test.espresso.matcher.ViewMatchers.isEnabled;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static junit.framework.Assert.assertEquals;
@@ -58,15 +55,10 @@ public class HomeActivityTest {
     private static TitleModel mockedTitleModel;
     int COUNT = 0;
 
-
     @BeforeClass
     public static void setUp() throws InterruptedException {
-
-
         Utils.App.Open("com.gkshanmugavel.newapp");
-
         Thread.sleep(10000);
-
         //Create mock object of TitleModel
         mockedTitleModel = mock(TitleModel.class);
     }
@@ -90,7 +82,6 @@ public class HomeActivityTest {
         assertEquals(0, mockList.size());
     }
 
-
     /**
      * check the title for initial
      */
@@ -113,87 +104,114 @@ public class HomeActivityTest {
                 .check(matches(withText(activityRule.getActivity().getString(R.string.click_list))));
     }
 
-
+    /**
+     * Scroll to First position and click the list and match the title
+     */
     @Test
-    public void scrollToLastPosition() {
+    public void scrollToFirstPositionClick() {
+        int position = 0;
         onView(withId(R.id.rv_items))
-                .perform(RecyclerViewActions.scrollToPosition(activityRule.getActivity().adapter.getItemCount() - 1));
+                .perform(actionOnItemAtPosition(position, click()));
+        TitleModel mock = activityRule.getActivity().adapter.getItemAt(position);
+        onView(withId(R.id.toolbar_title)).check(matches(withText(mock.getTitle())));
     }
 
-
+    /**
+     * Scroll to first position and click the list and match the title and Rotation the screen
+     * and click list item again the match the title
+     */
     @Test
-    public void scrollTo2ndPositionClick() {
-        onView(withId(R.id.rv_items)).perform(smoothScrollTo(2)).perform(click());
-        TitleModel mock = activityRule.getActivity().adapter.getItemAt(1);
-        onView(withId(R.id.toolbar_title))
-                .check(matches(withText(mock.getTitle())));
-    }
-
-
-    @Test
-    public void scrollTo2ndPositionClickRotation() {
-        onView(withId(R.id.rv_items)).perform(smoothScrollTo(2)).perform(click());
-        TitleModel mock = activityRule.getActivity().adapter.getItemAt(1);
-        onView(withId(R.id.toolbar_title))
-                .check(matches(withText(mock.getTitle())));
-
+    public void scrollToFirstPositionClickRotation() {
+        int position = 0;
+        onView(withId(R.id.rv_items))
+                .perform(actionOnItemAtPosition(position, click()));
+        TitleModel mock = activityRule.getActivity().adapter.getItemAt(position);
+        onView(withId(R.id.toolbar_title)).check(matches(withText(mock.getTitle())));
         rotateScreen();
-
-        onView(withId(R.id.toolbar_title))
-                .check(matches(withText(mock.getTitle())));
+        onView(withId(R.id.toolbar_title)).check(matches(withText(mock.getTitle())));
     }
 
-    @Test
-    public void scrollTo5thPositionClick() {
-        onView(withId(R.id.rv_items)).perform(smoothScrollTo(5)).perform(click());
-        TitleModel mock = activityRule.getActivity().adapter.getItemAt(4);
-        Utils.TimeWait.delay(2);
-        onView(withId(R.id.toolbar_title))
-                .check(matches(withText(mock.getTitle())));
-    }
-
-    @Test
-    public void scrollTo5thPositionClickRotation() {
-        onView(withId(R.id.rv_items)).perform(smoothScrollTo(5)).perform(click());
-        TitleModel mock = activityRule.getActivity().adapter.getItemAt(4);
-        onView(withId(R.id.toolbar_title))
-                .check(matches(withText(mock.getTitle())));
-
-        rotateScreen();
-        onView(withId(R.id.toolbar_title))
-                .check(matches(withText(mock.getTitle())));
-    }
-
+    /**
+     * Scroll to last position and click the list and match the title
+     */
     @Test
     public void scrollToLastPositionClick() {
-
-        int count = getCountFromRecyclerView(R.id.rv_items);
-
-
-        //onView(withId(R.id.recyclerView)).perform(RecyclerViewActions.scrollToPosition(3));
-
-
-        onView(withId(R.id.rv_items)).perform(RecyclerViewActions.scrollToPosition(4)).perform(click());
-
-        TitleModel mock = activityRule.getActivity().adapter.getItemAt(2);
-
-        onView(withId(R.id.toolbar_title))
-                .check(matches(withText(mock.getTitle())));
-
+        int position = getCountFromRecyclerView(R.id.rv_items) - 1;
+        onView(withId(R.id.rv_items))
+                .perform(actionOnItemAtPosition(position, click()));
+        TitleModel mock = activityRule.getActivity().adapter.getItemAt(position);
+        onView(withId(R.id.toolbar_title)).check(matches(withText(mock.getTitle())));
     }
+
+    /**
+     * Scroll to last position and click the list and match the title and Rotation the screen
+     * and click list item again the match the title
+     */
+    @Test
+    public void scrollToLastPositionClickRotation() {
+        int position = getCountFromRecyclerView(R.id.rv_items) - 1;
+        onView(withId(R.id.rv_items))
+                .perform(actionOnItemAtPosition(position, click()));
+        TitleModel mock = activityRule.getActivity().adapter.getItemAt(position);
+        onView(withId(R.id.toolbar_title)).check(matches(withText(mock.getTitle())));
+        rotateScreen();
+        onView(withId(R.id.toolbar_title)).check(matches(withText(mock.getTitle())));
+    }
+
+    /**
+     * Scroll to First position to last position
+     */
 
     @Test
-    public void scrollToLastPositionRotationClick() {
-        int position = activityRule.getActivity().adapter.getItemCount();
-        onView(withId(R.id.rv_items)).perform(smoothScrollTo(position)).perform(click());
-        TitleModel mock = activityRule.getActivity().adapter.getItemAt(position);
-        onView(withId(R.id.toolbar_title))
-                .check(matches(withText(mock.getTitle())));
-
-        rotateScreen();
-        onView(withId(R.id.toolbar_title))
-                .check(matches(withText(mock.getTitle())));
+    public void scrollToFirstScrollToLastPosition() {
+        int position = getCountFromRecyclerView(R.id.rv_items) - 1;
+        onView(withId(R.id.rv_items))
+                .perform(scrollToPosition(0));
+        onView(withId(R.id.rv_items))
+                .perform(scrollToPosition(position));
     }
+
+    /**
+     * Scroll to Last position to first position
+     */
+    @Test
+    public void scrollToLastScrollToFirstPosition() {
+        int position = getCountFromRecyclerView(R.id.rv_items) - 1;
+
+        onView(withId(R.id.rv_items))
+                .perform(scrollToPosition(position));
+        onView(withId(R.id.rv_items))
+                .perform(scrollToPosition(0));
+    }
+
+    /**
+     * Scroll to 3rd position
+     */
+    @Test
+    public void ScrollTo4thPositionClick() {
+        int position = 3;
+
+        onView(withId(R.id.rv_items))
+                .perform(actionOnItemAtPosition(position, click()));
+        TitleModel mock = activityRule.getActivity().adapter.getItemAt(position);
+        onView(withId(R.id.toolbar_title)).check(matches(withText(mock.getTitle())));
+    }
+
+    /**
+     * Scroll to 3rd position
+     */
+    @Test
+    public void ScrollTo4thdPositionClick() {
+        int position = 3;
+
+        onView(withId(R.id.rv_items))
+                .perform(actionOnItemAtPosition(position, click()));
+        TitleModel mock = activityRule.getActivity().adapter.getItemAt(position);
+        onView(withId(R.id.toolbar_title)).check(matches(withText(mock.getTitle())));
+        rotateScreen();
+        onView(withId(R.id.toolbar_title)).check(matches(withText(mock.getTitle())));
+    }
+
 
     @Test
     public final void shouldContainCertainListItem() {
@@ -203,7 +221,9 @@ public class HomeActivityTest {
 
     }
 
-
+    /**
+     * Rotate the screen
+     */
     private void rotateScreen() {
         Context context = InstrumentationRegistry.getTargetContext();
         int orientation = context.getResources().getConfiguration().orientation;
@@ -214,6 +234,11 @@ public class HomeActivityTest {
                         ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
 
+    /**
+     *  Match the text base on Recycler view holder
+     * @param text
+     * @return
+     */
     public static Matcher<RecyclerView.ViewHolder> withHolderTimeView(final String text) {
         return new BoundedMatcher<RecyclerView.ViewHolder, RowAdapter.MyViewHolder>(RowAdapter.MyViewHolder.class) {
 
@@ -228,34 +253,21 @@ public class HomeActivityTest {
 
             @Override
             public void describeTo(Description description) {
-                description.appendText("No ViewHolder found with text: " + text);
+                description.appendText(text);
             }
         };
     }
 
-    private static Matcher<View> childAtPosition(
-            final Matcher<View> parentMatcher, final int position) {
-
-        return new TypeSafeMatcher<View>() {
-            @Override
-            public void describeTo(Description description) {
-                parentMatcher.describeTo(description);
-            }
-
-            @Override
-            public boolean matchesSafely(View view) {
-                ViewParent parent = view.getParent();
-                return parent instanceof ViewGroup && parentMatcher.matches(parent)
-                        && view.equals(((ViewGroup) parent).getChildAt(position));
-            }
-        };
-    }
-
-    public static ScrollToPositionViewAction smoothScrollTo(int position) {
+    /*public static ScrollToPositionViewAction smoothScrollTo(int position) {
         return new ScrollToPositionViewAction(position);
-    }
+    }*/
 
-
+    /**
+     * Method Name : getRecyclerViewCount
+     * Arguments :  matcher -  view which you want to match
+     * Returns: count - Item count of the recyclerView
+     * Method Description : Use this method to get the item count of a recyclerView
+     */
     public int getCountFromRecyclerView(@IdRes int RecyclerViewId) {
 
         Matcher matcher = new TypeSafeMatcher<View>() {
@@ -273,35 +285,5 @@ public class HomeActivityTest {
         int result = COUNT;
         COUNT = 0;
         return result;
-    }
-
-
-    /***************************************************************************************
-     * Method Name : getRecyclerViewCount
-     * Arguments :  matcher -  view which you want to match
-     * Returns: count - Item count of the recyclerview
-     * Method Description : Use this method to get the item count of a recyclerview
-     ***********************************x*****************************************************/
-    public static int getRecyclerViewCount(Matcher matcher) {
-        final int[] num = new int[1];
-        onView(allOf(matcher, isEnabled())).check(matches(new TypeSafeMatcher<View>() {
-            RecyclerView recyclerView = null;
-
-            @Override
-            public boolean matchesSafely(View view) {
-                recyclerView = (RecyclerView) view;
-                RecyclerView.Adapter adapter = recyclerView.getAdapter();
-                Log.d("Booking Recycler Cnt", adapter.getItemCount() + "");
-                num[0] = adapter.getItemCount();
-                return true;
-            }
-
-            @Override
-            public void describeTo(Description description) {
-
-            }
-        }));
-        return num[0];
-
     }
 }

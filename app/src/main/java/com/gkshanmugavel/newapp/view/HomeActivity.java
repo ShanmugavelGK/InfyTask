@@ -139,10 +139,7 @@ public class HomeActivity extends AppCompatActivity {
                         activityHomeBinding.sflRefresh.setRefreshing(false);
                     if (isProgressBar)
                         progressDialog.dismissDialog();
-
                     CustomIdlingResource.decrement();
-
-
                     if (response.raw().cacheResponse() != null) {
                         // true: response was served from cache
                         if (response.body().rows.size() != 0) {
@@ -205,7 +202,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void parer(ArrayList<TitleModel> original) {
-        ArrayList<TitleModel> temp = new ArrayList<>();
+        titleModels = new ArrayList<>();
         for (TitleModel mTitle : original) {
             if (!(mTitle.getTitle() == null && mTitle.getDescription() == null && mTitle.getImageHref() == null)) {
                 titleModels.add(mTitle);
